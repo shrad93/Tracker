@@ -15,13 +15,13 @@ def framegrab(fps,left_coord,right_coord):
     while  True:
 
         flag, frame = cap.read()
-        
+
         if flag:
             # The frame is ready and already captured
             cv2.rectangle(frame,left_coord,right_coord,(0,255,0),3)
             # cv2.imshow('video', frame)
             cv2.imwrite('video.png', frame)
-            return np.array()
+            return frame
             pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
             print str(pos_frame)+" frames"
         else:
