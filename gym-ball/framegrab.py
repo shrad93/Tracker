@@ -1,21 +1,27 @@
 import cv2
 
 
-def framegrab(fps,left_coord,right_coord):
-    cap = cv2.VideoCapture("./vid1.mp4")
+cap = cv2.VideoCapture("./vid1.mp4")
     while not cap.isOpened():
         cap = cv2.VideoCapture("./vid1.mp4")
         cv2.waitKey(1000)
         print "Wait for the header"
 
-    pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
-    while True:
+pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
+
+def framegrab(fps,left_coord,right_coord):
+    
+    
+    while  True:
+
         flag, frame = cap.read()
+        
         if flag:
             # The frame is ready and already captured
             cv2.rectangle(frame,left_coord,right_coord,(0,255,0),3)
-            cv2.imshow('video', frame)
-            # cv2.imwrite('video.png', frame)
+            # cv2.imshow('video', frame)
+            cv2.imwrite('video.png', frame)
+            return np.array()
             pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
             print str(pos_frame)+" frames"
         else:
