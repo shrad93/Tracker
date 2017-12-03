@@ -22,20 +22,19 @@ class Video:
 		self.cap.set(cv2.CAP_PROP_POS_FRAMES, index)
 		self.pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
 
-
-	def grab_frame(self, enclosing_window):
+	def draw_rect_frame(self, frame, enclosing_window):
 		left_coord = (enclosing_window.top, enclosing_window.left)
 		right_coord = (enclosing_window.bottom, enclosing_window.right)
+		cv2.rectangle(frame,left_coord,right_coord,(0,255,0),3)
+		return frame
+
+	def grab_frame(self):
 
 		while  True:
 			flag, frame = self.cap.read()
 
 			if flag:
-				# The frame is ready and already captured, so let's draw enclosing window
-				cv2.rectangle(frame,left_coord,right_coord,(0,255,0),3)
-				# cv2.imshow('video', frame)
-				#cv2.imwrite('video.png', frame)
-
+				# The frame is ready and already captured
 				#update the index of next frame to be read
 				self.pos_frame = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
 				#print str(pos_frame)+" frames"
