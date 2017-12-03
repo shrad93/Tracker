@@ -45,6 +45,7 @@ class BallEnv(gym.Env):
 
 			#draw this enclosing window on the frame grabbed above
 			observation = self.video.draw_rect_frame(next_frame, self.window_coordinates)
+			self.state = observation
 
 			self.count += 1
 
@@ -66,4 +67,29 @@ class BallEnv(gym.Env):
 		return 0
 
 	def _render(self, mode='human', close=False):
-		...
+		if close:
+	        if self.viewer is not None:
+	            self.viewer.close()
+	            self.viewer = None
+	        return
+
+	    frame = self.state
+
+	    if frame is None:
+	    	return 
+
+
+	    if self.viewer is None:
+
+	    	self.viewer = cv2
+	   
+	    self.viewer.imshow('video', frame)
+	    return frame
+
+
+
+
+
+
+
+
