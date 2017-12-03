@@ -1,0 +1,1 @@
+This enviornment simulates endless moving of ball.
