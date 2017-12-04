@@ -1,26 +1,29 @@
 import cv2
+import pdb
 
 class Video:
 
 	def __init__(self, path="./vid1.mp4"):
+	
 		self.cap = cv2.VideoCapture(path)
 		while not self.cap.isOpened():
 			self.cap = cv2.VideoCapture(path)
 			cv2.waitKey(1000)
-			print "Wait for the header"
+		
+		print "Video opened"
 
-		self.pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
+		self.pos_frame = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
 
 	def get_fps(self):
-		return self.cap.get(cv2.cv.CV_CAP_PROP_FPS)
+		return self.cap.get(cv2.CAP_PROP_FPS)
 
 	def reset_playing(self):
 		self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-		self.pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
+		self.pos_frame = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
 
 	def start_playing_from(self, index):
 		self.cap.set(cv2.CAP_PROP_POS_FRAMES, index)
-		self.pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
+		self.pos_frame = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
 
 	def draw_rect_frame(self, frame, enclosing_window):
 		left_coord = (enclosing_window.top, enclosing_window.left)
