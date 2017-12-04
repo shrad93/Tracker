@@ -1,1 +1,1 @@
-from gym_ball.envs.ball_env import BallEnv
+from gym.envs.ball.ball_env import BallEnv

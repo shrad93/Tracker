@@ -2,10 +2,13 @@ import gym
 
 from gym import error, spaces, utils
 from gym.utils import seeding
-
+import os
 from rect import *
 from video_sk import *  #or from video import * (if opencv works on your system)
+import configparser
+config = configparser.ConfigParser()
 
+config.read('config.ini')
 #import cv2
 import matplotlib.pyplot as plt
 import scipy.misc
@@ -18,8 +21,8 @@ class BallEnv(gym.Env):
 	episode_length = 25   #TODO: set length of one episode
 
 	def __init__(self):
-		video_path = '/mnt/c/Users/Shradha/Documents/SicunGao/dot-slow.m4v'
-		self.video = Video(video_path)
+		self.video_path = str(config['video']['path'])
+		self.video = Video(self.video_path)
 		self.fps = self.video.get_fps()
 		height = self.video.get_height()
 		width = self.video.get_width()
@@ -73,6 +76,7 @@ class BallEnv(gym.Env):
 
 	def _reset(self):
 		#grab the very first frame the set enclosing window correctly
+		# self.count = 0
 		self.video.reset_playing()
 		frame = self.video.grab_frame()
 
@@ -96,7 +100,7 @@ class BallEnv(gym.Env):
 		#cv2.imshow('video', frame), if cv2 works on your system
 		plt.imshow(frame)
 
-		filepath = '/mnt/c/Users/Shradha/Documents/SicunGao/vid_step/'+str(self.count)+'.jpg'
+		filepath = self.video_path+str(self.count)+'.jpg'
 		scipy.misc.imsave(filepath, frame)
 
 
