@@ -70,6 +70,6 @@ if __name__ == "__main__":
 	amt = 35
 	radius = 20
 	num_step = (5, 10)
-	file_name = "coordinate-log.txt"
+	file_name = "../data/coordinate-log.txt"
 	create(start, number_images, amt, radius, num_step, file_name)
 		

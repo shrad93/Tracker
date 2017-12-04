@@ -5,4 +5,6 @@ opencv
 configparser
 skvideo.io
 
+pip install python-opencv
 pip install configparser
+pip install sk-video

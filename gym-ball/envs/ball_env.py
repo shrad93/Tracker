@@ -2,17 +2,21 @@ import gym
 
 from gym import error, spaces, utils
 from gym.utils import seeding
+
 import os
+from util import *
 from rect import *
 from video_sk import *  #or from video import * (if opencv works on your system)
 import configparser
-config = configparser.ConfigParser()
 
-config.read('config.ini')
 #import cv2
 import matplotlib.pyplot as plt
 import scipy.misc
 import pdb
+
+config = configparser.ConfigParser()
+config.read('/mnt/c/Users/Shradha/Documents/SicunGao/gym/gym/envs/ball/config.ini')
+
 
 class BallEnv(gym.Env):
 	metadata = {'render.modes': ['human']}
@@ -35,7 +39,7 @@ class BallEnv(gym.Env):
 
 		
 		
-		self.velocity = 300  		#TODO: set value of velocity
+		self.velocity = 35*5  		#TODO: set value of velocity = amt*fps
 
 
 		self.state = None #represents previous frame
@@ -43,8 +47,10 @@ class BallEnv(gym.Env):
 		self.count = 0
 		
 
-		f = open(str(config['video']['coordinate']),"r")
-		self.coordinate_logs = f.readlines()
+		coord_f = open(str(config['video']['coordinate']),"r")
+		self.coordinate_logs = coord_f.readlines()
+
+		self.render_path = str(config['render']['path'])
 		
 
 	def _step(self, action):
@@ -54,38 +60,43 @@ class BallEnv(gym.Env):
 			next_frame = self.video.grab_frame()
 
 			#In one unit of action in a frame, the shift would be velocity/fps
+			shift = self.velocity/self.fps
 			if action == 0: #up
-				self.window_coordinates.move_up(self.velocity/self.fps)
+				self.window_coordinates.move_up(shift)
 			elif action == 1: #down
-				self.window_coordinates.move_down(self.velocity/self.fps)
+				self.window_coordinates.move_down(shift)
 			elif action == 2: #left
-				self.window_coordinates.move_left(self.velocity/self.fps)
+				self.window_coordinates.move_left(shift)
 			elif action == 3: #right
-				self.window_coordinates.move_right(self.velocity/self.fps)
+				self.window_coordinates.move_right(shift)
 				
 
 			#draw this enclosing window on the frame grabbed above
 			observation = self.video.draw_rect_frame(next_frame, self.window_coordinates)
 			self.state = observation
-
-			reward = self._reward(next_frame, self.window_coordinates)
-
+			
 			self.count += 1
-			if self.count %25 == 0:
+			
+			reward = self._reward(next_frame, self.window_coordinates)
+			
+			if self.count % self.episode_length == 0:
 				done = True
 
 			return observation, reward, done, {}
 
 		except Exception, e:
+			print "in catch block"
 			done = True
 
 	def _reset(self):
 		#grab the very first frame the set enclosing window correctly
 		# self.count = 0
 		self.video.reset_playing()
+		self.count = 0
+
 		frame = self.video.grab_frame()
 
-		self.window_coordinates = Rect(300, 0, 500, 100) #TODO: find correct ground truth coordinate and update it
+		self.window_coordinates = convert_to_rect(self.coordinate_logs[self.count]) #initiallize with ground truth 
 		frame = self.video.draw_rect_frame(frame, self.window_coordinates)
 
 		self.state = frame
@@ -93,16 +104,11 @@ class BallEnv(gym.Env):
 		return frame
 
 	def _reward(self, frame, window_coordinates):
-		#TODO: IOU
-
+	
 		reward = 0
-		if self.count%reward_step ==0:
-			ground_truth = self.coordinate_logs[self.count]
-			ground_truth = ground_truth.split(':')
-			ground_truth = [int(x) for x in ground_truth]
-			object_coord = [window_coordinates.top,window_coordinates.left,window_coordinates.bottom,window_coordinates.right]
-			reward = intersection_over_union(ground-truth,object_coord)
-
+		if self.count % self.reward_step == 0:
+			ground_truth = convert_to_rect(self.coordinate_logs[self.count])
+			reward = intersection_over_union(ground_truth,window_coordinates)
 
 		return reward
 
@@ -115,35 +121,14 @@ class BallEnv(gym.Env):
 		#cv2.imshow('video', frame), if cv2 works on your system
 		plt.imshow(frame)
 
-		filepath = self.video_path+str(self.count)+'.jpg'
+		filepath = self.render_path+str(self.count)+'.jpg'
 		scipy.misc.imsave(filepath, frame)
 
 
 		return frame
 
 
-	def intersection_over_union(boxA, boxB):
-		# determine the (x, y)-coordinates of the intersection rectangle
-		xA = max(boxA[0], boxB[0])
-		yA = max(boxA[1], boxB[1])
-		xB = min(boxA[2], boxB[2])
-		yB = min(boxA[3], boxB[3])
-	 
-		# compute the area of intersection rectangle
-		interArea = (xB - xA + 1) * (yB - yA + 1)
-	 
-		# compute the area of both the prediction and ground-truth
-		# rectangles
-		boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
-		boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
-	 
-		# compute the intersection over union by taking the intersection
-		# area and dividing it by the sum of prediction + ground-truth
-		# areas - the interesection area
-		iou = interArea / float(boxAArea + boxBArea - interArea)
-	 
-		# return the intersection over union value
-		return iou
+	
 
 
 
