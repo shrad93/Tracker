@@ -19,6 +19,7 @@ class BallEnv(gym.Env):
 
 	action_set = {'up', 'down', 'left', 'right'}
 	episode_length = 25   #TODO: set length of one episode
+	reward_step = 5
 
 	def __init__(self):
 		self.video_path = str(config['video']['path'])
@@ -40,6 +41,10 @@ class BallEnv(gym.Env):
 		self.state = None #represents previous frame
 		self.window_coordinates = None
 		self.count = 0
+		
+
+		f = open(str(config['video']['coordinate']),"r")
+		self.coordinate_logs = f.readlines()
 		
 
 	def _step(self, action):
@@ -89,7 +94,17 @@ class BallEnv(gym.Env):
 
 	def _reward(self, frame, window_coordinates):
 		#TODO: IOU
-		return 0
+
+		reward = 0
+		if self.count%reward_step ==0:
+			ground_truth = self.coordinate_logs[self.count]
+			ground_truth = ground_truth.split(':')
+			ground_truth = [int(x) for x in ground_truth]
+			object_coord = [window_coordinates.top,window_coordinates.left,window_coordinates.bottom,window_coordinates.right]
+			reward = intersection_over_union(ground-truth,object_coord)
+
+
+		return reward
 
 	def _render(self, mode='human', close=False):
 		frame = self.state
@@ -105,6 +120,31 @@ class BallEnv(gym.Env):
 
 
 		return frame
+
+
+	def intersection_over_union(boxA, boxB):
+		# determine the (x, y)-coordinates of the intersection rectangle
+		xA = max(boxA[0], boxB[0])
+		yA = max(boxA[1], boxB[1])
+		xB = min(boxA[2], boxB[2])
+		yB = min(boxA[3], boxB[3])
+	 
+		# compute the area of intersection rectangle
+		interArea = (xB - xA + 1) * (yB - yA + 1)
+	 
+		# compute the area of both the prediction and ground-truth
+		# rectangles
+		boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
+		boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+	 
+		# compute the intersection over union by taking the intersection
+		# area and dividing it by the sum of prediction + ground-truth
+		# areas - the interesection area
+		iou = interArea / float(boxAArea + boxBArea - interArea)
+	 
+		# return the intersection over union value
+		return iou
+
 
 
 
